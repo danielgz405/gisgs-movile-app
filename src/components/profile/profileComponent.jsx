@@ -3,7 +3,7 @@ import { View, Text, Image, StyleSheet } from 'react-native';
 import { PrimaryButton } from '../../utils/Buttons/Buttons';
 import { themes } from '../../assets/themes/themes';
 
-const ProfileView = ({ name, email, profileImage }) => {
+const ProfileView = ({ name, email, profileImage, setAuth }) => {
     return (
       <View style={styles.container}>
         <Image
@@ -15,7 +15,7 @@ const ProfileView = ({ name, email, profileImage }) => {
           <Text style={styles.name}>{name}</Text>
           <Text style={styles.email}>{email}</Text>
         </View>
-        <PrimaryButton text="Cerrar sesion" className={['p-10']} style={{marginTop: 10}} />
+        <PrimaryButton text="Cerrar sesion" onPress={() => {setAuth(null)}} className={['p-10']} style={{marginTop: 10}} />
       </View>
     );
   };

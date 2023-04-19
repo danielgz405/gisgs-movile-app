@@ -1,33 +1,96 @@
-import { View, Text, TextInput, StyleSheet, Switch, TouchableOpacity, ScrollView } from "react-native";
+import { View, Text, TextInput, StyleSheet, Switch, TouchableOpacity, ScrollView, ToastAndroid, Vibration, Alert } from "react-native";
 import { RadioButton } from 'react-native-paper';
 import { styles } from "../../assets/styles/global";
 import Constants from "expo-constants";
 import { themes } from "../../assets/themes/themes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { GeneralInput } from "../../utils/Inputs/Inputs";
 import { PrimaryText, Title } from "../../utils/Texts/Texts";
-import { Link } from "react-router-native";
+import { Link, useNavigate } from "react-router-native";
 import { ArrowSmallLeftIcon } from "react-native-heroicons/solid";
 import { Dropdown } from "../../utils/Inputs/Drop";
 import { Checkbox } from 'react-native-paper';
 import { PrimaryButton } from "../../utils/Buttons/Buttons";
+import { insertVisitor } from "../../api/events/events";
 
-export default function Visitor () {
+export default function Visitor ({ auth }) {
+    const navigate = useNavigate();
     const typeItems = [
-        { label: "Carro", value: "Carro" },
-        { label: "Camión", value: "Camión" },
-        { label: "Furgón", value: "Furgón" },
-        { label: "Moto", value: "Moto" },
-        { label: "Bicicleta", value: "Bicicleta" },
+        { label: "Cédula", value: "CC" },
+        { label: "Tarjeta de identidad", value: "TI" },
+        { label: "Pasaporte", value: "P" },
+        { label: "Cédula de extranjería", value: "CE" },
     ]
     const [data, setData] = useState({
-        Placa: '',
-        States: '',
-        Who: '',
-        carType: '',
+        "into": true,
+        "type-identification": "",
+        "identification": "",
+        "tower": "",
+        "apto": "",
+        "floor": "",
+        "automobile": false,
+        "autorization": false,
+        "worker": `${auth.name}`,
+        "description": ""
     });
     const [isEnabled, setIsEnabled] = useState(false)
+    const [isVehicle, setIsVehicle] = useState(false)
     const [checked, setChecked] = useState('into')
+
+    const submitHandler = () => {
+        if (!data["type-identification"]) {
+            ToastAndroid.show('Selecciona un tipo de identificacion', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.identification) {
+            ToastAndroid.show('Ingresa una identificacion', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.tower) {
+            ToastAndroid.show('Ingresa una torre', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.apto) {
+            ToastAndroid.show('Ingresa una apto', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.floor) {
+            ToastAndroid.show('Ingresa un piso', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.worker) {
+            ToastAndroid.show('Ingresa un a la persona que autorizo', ToastAndroid.SHORT);
+            return
+        }
+        if (!data.description) {
+            ToastAndroid.show('Ingresa una descripcion', ToastAndroid.SHORT);
+            return
+        }
+
+        insertVisitor(data).then(() => {
+            Vibration.vibrate()
+            ToastAndroid.show('Los datos se han enviado correctamente', ToastAndroid.SHORT);
+            navigate('/Home');
+        }).catch((error) => {
+            Vibration.vibrate(PATTERN)
+            if (error.response && error.response.status === 405) {
+                Alert.alert('Ha ocurrido un error', `Verifique su conexion a internet`, [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+            }else {
+                Alert.alert('Ha ocurrido un error', `${error}`, [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+            }
+        })
+    }
+
+    useEffect(() => {
+        if (auth == null){
+            navigate('/');
+            ToastAndroid.show('Vuelve a iniciar seccion :)', ToastAndroid.SHORT);
+        }
+    }, [auth])
     return (
         <View>
              <View style={style.navigation}>
@@ -40,9 +103,13 @@ export default function Visitor () {
                 </View>
              </View>
             <ScrollView style={style.formContainer}>
-                <TouchableOpacity
+            <TouchableOpacity
                     style={style.checkboxContainer}
-                    onPress={() => setChecked('into')}>
+                    onPress={() => { 
+                        setChecked('into'); 
+                        setData({...data, into: true});
+                    }}
+                >
 
                     <PrimaryText className={['text-y-center', 'text-white']}>Ingreso</PrimaryText>
                     <RadioButton
@@ -50,55 +117,65 @@ export default function Visitor () {
                         value="into"
                         color={themes.colors.primary}
                         status={ checked === 'into' ? 'checked' : 'unchecked' }
-                        onPress={() => setChecked('into')}
+                        onPress={() => {                        
+                            setChecked('into'); 
+                            setData({...data, into: true });
+                        }}
                     />
 
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={style.checkboxContainer}
-                    onPress={() => setChecked('out')}>
+                    onPress={() => {                        
+                            setChecked('into'); 
+                            setData({...data, into: false });
+                        }}
+                >
                     <PrimaryText className={['text-y-center', 'text-white']}>Salida</PrimaryText>
                     <RadioButton
                         label="out item"
                         value="out"
                         color={themes.colors.primary}
                         status={ checked === 'out' ? 'checked' : 'unchecked' }
-                        onPress={() => setChecked('out')}
+                        onPress={() => {                        
+                            setChecked('into'); 
+                            setData({...data, into: false });
+                        }}
                     />
                 </TouchableOpacity>
                 <View style={style.dropDown}>
-                    <Dropdown items={typeItems} onValueChange={(e) => setData({...data, carType: e})} placeholder={{ label: "Tipo de identificacion", value: null }} />
+                    <Dropdown items={typeItems} onValueChange={(e) => setData({...data, "type-identification": e})} placeholder={{ label: "Tipo de identificacion", value: null }} />
                 </View>
-                <GeneralInput placeholder="Numero de identificacion"  value={data.Placa} style={style["mb-10"]} onChange={(e) => setData({...data,Placa : e})} />
+                <GeneralInput placeholder="Numero de identificacion"  value={data.identification} style={style["mb-10"]} onChange={(e) => setData({...data, identification: e})} />
                 <View style={style.tower}>
-                    <GeneralInput placeholder="Torre"  value={data.Placa} style={style.dropDownRow} onChange={(e) => setData({...data,Placa : e})} />
-                    <GeneralInput placeholder="Piso"  value={data.Placa} style={style.dropDownRow} onChange={(e) => setData({...data,Placa : e})} />
-                    <GeneralInput placeholder="Apto"  value={data.Placa} style={style.dropDownRow} onChange={(e) => setData({...data,Placa : e})} />
+                    <GeneralInput placeholder="Torre"  value={data.tower} style={style.dropDownRow} onChange={(e) => setData({...data, tower: e})} />
+                    <GeneralInput placeholder="Piso"  value={data.floor} style={style.dropDownRow} onChange={(e) => setData({...data, floor: e})} />
+                    <GeneralInput placeholder="Apto"  value={data.apto} style={style.dropDownRow} onChange={(e) => setData({...data, apto: e})} />
                 </View>
-                <TouchableOpacity style={style.checkboxContainer}  onPress={() => setIsEnabled(!isEnabled)}>
+                <TouchableOpacity style={style.checkboxContainer}  onPress={() => {setIsVehicle(!isEnabled); setData({ ...data, autorization: isEnabled })}}>
                     <PrimaryText className={['text-y-center', 'text-white']}>Se autoriza el ingreso</PrimaryText>
                     <Switch
                         trackColor={{false: themes.colors.gray[600], true: themes.colors.gray[400]}}
                         thumbColor={isEnabled ? themes.colors.primary : themes.colors.gray[400]}
                         ios_backgroundColor="#3e3e3e"
-                        onValueChange={() => setIsEnabled(!isEnabled)}
+                        onValueChange={() => {setIsEnabled(!isEnabled); setData({ ...data, autorization: isEnabled })}}
                         value={isEnabled}
                         
                     />
                 </TouchableOpacity>
-                <TouchableOpacity style={style.checkboxContainer}  onPress={() => setIsEnabled(!isEnabled)}>
+                <TouchableOpacity style={style.checkboxContainer}  onPress={() => {setIsVehicle(!isVehicle); setData({ ...data, automobile: isEnabled })}}>
                     <PrimaryText className={['text-y-center', 'text-white']}>Ingresa con vehiculo</PrimaryText>
                     <Switch
                         trackColor={{false: themes.colors.gray[600], true: themes.colors.gray[400]}}
-                        thumbColor={isEnabled ? themes.colors.primary : themes.colors.gray[400]}
+                        thumbColor={isVehicle ? themes.colors.primary : themes.colors.gray[400]}
                         ios_backgroundColor="#3e3e3e"
-                        onValueChange={() => setIsEnabled(!isEnabled)}
-                        value={isEnabled}
+                        onValueChange={() => {setIsVehicle(!isVehicle); setData({ ...data, automobile: isEnabled })}}
+                        value={isVehicle}
                         
                     />
                 </TouchableOpacity>
-                <GeneralInput placeholder="Quien autoriza" style={style["mb-10"]} value={data.Quien} onChange={(e) => setData({...data, Who: e})} />
-                <GeneralInput placeholder="Descripcion"  value={data.Quien} onChange={(e) => setData({...data, Who: e})} />
+                <GeneralInput placeholder="Quien autoriza" style={style["mb-10"]} value={data.worker} onChange={(e) => setData({...data, worker: e})} />
+                <GeneralInput placeholder="Descripcion"  value={data.Quien} onChange={(e) => setData({...data, description: e})} />
                 <PrimaryButton onPress={() => submitHandler()} className={['text-center', 'p-10', 'rounded-full', 'mt-15']} text="Enviar" />
             </ScrollView>
          </View>

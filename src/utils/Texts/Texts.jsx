@@ -7,7 +7,7 @@ export function PrimaryText({ className, style, children }, ...props) {
         styles.defaultText,
         style && style,
         className?.includes('bold') && {fontWeight: themes.fontWeight["font-bold"]},
-        className?.includes('text-xs') && {fontSize: themes.fontsSize.xl},
+        className?.includes('text-xs') && {fontSize: themes.fontsSize.xs},
         className?.includes('text-sm') && {fontSize: themes.fontsSize["sm"]},
         className?.includes('text-black') && {color: themes.colors.cyan[900]},
         className?.includes('text-white') && {color: themes.colors.white},

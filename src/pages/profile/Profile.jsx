@@ -1,12 +1,19 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { StyleSheet, ToastAndroid, View } from 'react-native';
 import ProfileView from '../../components/profile/profileComponent';
 import { ArrowSmallLeftIcon } from 'react-native-heroicons/solid';
-import { Link } from 'react-router-native';
+import { Link, useNavigate } from 'react-router-native';
 import { themes } from '../../assets/themes/themes';
 import Constants from "expo-constants";
 
-export default function ProfileScreen () {
+export default function ProfileScreen ({ auth, setAuth }) {
+    const navigate = useNavigate();
+    useEffect(() => {
+        if (auth == null){
+            navigate('/');
+            ToastAndroid.show('Se he cerrado sesion exitosamente :)', ToastAndroid.SHORT);
+        }
+    }, [auth])
     return (
     <View>
         <View style={style.navigation}>
@@ -15,9 +22,10 @@ export default function ProfileScreen () {
             </Link>
         </View>
         <ProfileView
-            name="Juan Pérez"
-            email="juan.perez@gmail.com"
-            profileImage="https://ui-avatars.com/api/?name=User&rounded=true&background=047857&color=fff&bold=true"
+            name={auth?.name}
+            email={auth?.email}
+            setAuth={setAuth}
+            profileImage={auth?.image ? auth?.image : `https://ui-avatars.com/api/?name=${auth?.name}&rounded=true&background=047857&color=fff&bold=true`}
         />
     </View>
     );

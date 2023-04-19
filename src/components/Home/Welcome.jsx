@@ -36,11 +36,11 @@ const style = StyleSheet.create({
         alignContent: 'center'
     },
     image: {
-        width: 100, 
-        height: 100, 
+        width: 150, 
+        height: 150, 
         marginLeft: 'auto', 
         marginRight: 'auto',
-        transform: [{translateY: 40}]
+        transform: [{translateY: 85}, {translateX: 10}],
     },
     textContainer: {
         paddingLeft: 15,

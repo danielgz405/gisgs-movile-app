@@ -1,65 +1,61 @@
 import { ArchiveBoxArrowDownIcon, ClockIcon, TruckIcon, UserGroupIcon, XCircleIcon } from "react-native-heroicons/solid";
 import { PlusCircleIcon } from "react-native-heroicons/outline";
 import { PrimaryText, Title } from "../../utils/Texts/Texts";
-import { FlatList, View, Image, StyleSheet, TouchableNativeFeedback, Pressable } from "react-native";
+import { FlatList, View, Image, StyleSheet, TouchableNativeFeedback, Pressable, ToastAndroid } from "react-native";
 import { PrimaryButtonIcon } from "../../utils/Buttons/Buttons";
 import { themes } from "../../assets/themes/themes";
 import Constants from "expo-constants";
 import { useNavigate } from "react-router-native";
 import { Modal } from "react-native";
-import { useState } from "react";
-import { Text } from "react-native-svg";
-
-const events = [
-    {
-        type: 'box',
-        vis_names: 'Jose Maria',
-        vis_lastName: 'Motta Rodrigez',
-        identification: '145236987',
-        decription: 'anthing',
-    },
-    {
-        type: 'ingreso',
-        vis_names: 'Jose Maria',
-        vis_lastName: 'Motta Rodrigez',
-        identification: '145236987',
-        decription: 'anthing',
-    },
-    {
-        type: 'ingreso',
-        vis_names: 'Jose Maria',
-        vis_lastName: 'Motta Rodrigez',
-        identification: '145236987', 
-        decription: 'anthing',
-    },
-    {
-        type: 'vehiculo',
-        vis_names: 'Jose Maria',
-        vis_lastName: 'Motta Rodrigez',
-        identification: '145236987',
-        decription: 'anthing',
-    }
-]
+import { useEffect, useState } from "react";
+import { getEvents } from "../../api/events/events";
 
 function Event({ item }){
     return (<View style={style.events} >
         <View style={style.icon}>
-            {item?.type === 'vehiculo' ? <TruckIcon size={25} color={themes.colors.white} /> : item?.type === 'ingreso' ? <UserGroupIcon size={25} color={themes.colors.white} /> : <ArchiveBoxArrowDownIcon size={25} color={themes.colors.white} />}
+            {item["event-type"] === 'vehiculo' ? <TruckIcon size={25} color={themes.colors.white} /> : item["event-type"] === 'ingreso' ? <UserGroupIcon size={25} color={themes.colors.white} /> : <ArchiveBoxArrowDownIcon size={25} color={themes.colors.white} />}
         </View>
         <View style={style.eventsText}>
-            <PrimaryText style={{marginRight: 'auto'}} className={['text-white']} >{item?.decription}</PrimaryText>
+            <PrimaryText style={{marginRight: 'auto'}} className={['text-white']} >{item?.description}</PrimaryText>
             <View style={style.descriptionEvent}>
-                <PrimaryText className={['text-gray-400']} >{item?.decription}</PrimaryText>
+                <PrimaryText className={['text-gray-400', 'text-xs']} >{item?.worker}</PrimaryText>
                 <ClockIcon style={{...style["mx-10"], ...style["my-auto"]}} size={10} color={themes.colors.white} />
-                <PrimaryText style={{marginRight: 'auto'}} className={['text-gray-400']} >{item?.decription}</PrimaryText>
+                <PrimaryText style={{marginRight: 'auto', flex: 1}} className={['text-gray-400', 'text-xs']} >{item?.date}</PrimaryText>
             </View>
         </View>
     </View>)
 }
 
-export default function Home() {
+export default function Home({ auth }) {
     const navigate = useNavigate();
     const [modalVisible, setModalVisible] = useState(false)
+    const [events, setEvents] = useState([])
+
+    const fetchEvents = () => {
+        getEvents().then((res) => {
+            if (res.status === 200) {
+                setEvents(res.data)
+            } else {
+                ToastAndroid.show('Ha ocurrido un error', ToastAndroid.SHORT);
+            }
+        }).catch((err) => {
+            console.log();
+            if (err.response && err.response.status === 405) {
+                ToastAndroid.show('Verifique su conexion a internet y vuelva a intentar', ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show('Ha ocurrido un error', ToastAndroid.SHORT);
+            }    
+        })
+    }
+
+    useEffect(() => {
+        if (auth == null){
+            navigate('/');
+            ToastAndroid.show('Vuelve a iniciar seccion :)', ToastAndroid.SHORT);
+        }
+    }, [auth])
+
+    useEffect(() => fetchEvents(), [])
     return (
         <View style={style.container}>
             <Modal
@@ -67,8 +63,7 @@ export default function Home() {
                 transparent={true}
                 visible={modalVisible}
                 onRequestClose={() => {
-                Alert.alert('Modal has been closed.');
-                setModalVisible(!modalVisible);
+                    setModalVisible(!modalVisible);
                 }}>
                 <View style={style.centeredView}>
                     <View style={style.modalView}>
@@ -103,12 +98,12 @@ export default function Home() {
             <View style={style.navigation}>
                 <View style={style.userContainer}>
                     <TouchableNativeFeedback onPress={() => navigate('/Profile')}>
-                        <Image style={style.image} source={{uri: 'https://ui-avatars.com/api/?name=User&rounded=true&background=047857&color=fff&bold=true'}} />
+                        <Image style={style.image} source={{uri: auth.image ? auth.image : `https://ui-avatars.com/api/?name=${auth.name}&rounded=true&background=047857&color=fff&bold=true`}} />
                     </TouchableNativeFeedback>
                     <Title style={{        
                         marginBottom: 'auto',
                         marginTop: 'auto',
-                    }}>User</Title>
+                    }}>{auth.name}</Title>
                 </View>
                 <PrimaryButtonIcon onPress={() => setModalVisible(true)} className={['bg-transparent']} style={{        
                         marginBottom: 'auto',
@@ -190,8 +185,9 @@ const style = StyleSheet.create({
         borderBottomWidth: 1,
     },
     descriptionEvent: {
+        flex: 1,
         flexDirection: 'row',
-        width: '100%'
+        width: '90%'
     },
     icon: {
         backgroundColor: themes.colors.primary,

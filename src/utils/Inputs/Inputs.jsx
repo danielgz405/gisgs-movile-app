@@ -2,7 +2,7 @@ import { TextInput } from "react-native";
 import { styles } from "../../assets/styles/global"
 import { themes } from "../../assets/themes/themes"
 
-export function GeneralInput({ onChange, placeholder, className, style, text, keyboardType, secureTextEntry }) {
+export function GeneralInput({ onChange, placeholder, className, style, value, keyboardType, secureTextEntry }) {
 
     const classNames = [ 
         styles.defaultInput,
@@ -19,6 +19,6 @@ export function GeneralInput({ onChange, placeholder, className, style, text, ke
         placeholder={placeholder}
         style={classNames}
         onChangeText={(e) => onChange && onChange(e)}
-        value={text}
+        value={value}
     />);
 }

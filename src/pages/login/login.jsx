@@ -16,8 +16,7 @@ const PATTERN = [
     1 * ONE_SECOND_IN_MS,
 ];
 
-export default function Login({}) {
-    const [auth, setAuth] = useState({});
+export default function Login({auth, setAuth}) {
     const navigate = useNavigate();
     console.log(auth);
     const [data, setData] = useState({
@@ -31,9 +30,9 @@ export default function Login({}) {
             if (res.status === 200) {
                 Vibration.vibrate()
                 ToastAndroid.show('Bienvenido', ToastAndroid.SHORT);
-                setAuth(res);
+                setAuth(res.data);
                 navigate('/Home')
-                console.log('ok');
+                console.log(res.data);
               } else {
                 Vibration.vibrate(PATTERN)
                 Alert.alert('Ha ocurrido un error', 'Para mas informacion comuniquese con su administrador', [
@@ -43,10 +42,15 @@ export default function Login({}) {
           })
           .catch((error) => {
             Vibration.vibrate(PATTERN)
-            console.log(error);
-            Alert.alert('Ha ocurrido un error', `${error}`, [
-                {text: 'OK', onPress: () => console.log('OK Pressed')},
-            ]);
+            if (error.response && error.response.status === 405) {
+                Alert.alert('Ha ocurrido un error', `Verifique su conexion a internet`, [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+            }else {
+                Alert.alert('Ha ocurrido un error', `${error}`, [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+            }
           });
       };
 
@@ -59,7 +63,7 @@ export default function Login({}) {
             </View>
             <View style={style.container}>
                 <View style={style.textContainer}>
-                    <Image source={require('../../assets/images/favicon.png')} style={style.image} />
+                    <Image source={require('../../../assets/favicon.png')} style={style.image} />
                     <Title className={['text-white', 'text-center', 'extra-bold', 'text-4xl']} style={{ marginBottom: 15 }}>Gisgs Consulting</Title>
                     <PrimaryText className={['text-white', 'text-center', 'mb-30']}>Bienvenido, en este software podras actualizar la bitacora del dia</PrimaryText>
                 </View>
@@ -93,6 +97,13 @@ const style = StyleSheet.create({
         height: 100, 
         marginLeft: 'auto', 
         marginRight: 'auto',
+        shadowColor: themes.colors.gray[800],
+        shadowOffset: {
+            width: 10,
+            height: 20,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 10.84,
     },
     "mb-10": {
         marginBottom: 10

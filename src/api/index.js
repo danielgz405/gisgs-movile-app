@@ -1,4 +1,4 @@
-const API = 'http://172.31.200.65:5050';
+const API = 'http://172.30.56.183:5050';
 
 
 export const endPoints = {
@@ -9,4 +9,10 @@ export const endPoints = {
         profile: (userId) => `${API}/profile/${userId}`,
         createUser: `${API}/signup`,
     },
+    events: {
+        InsertAutomobile: `${API}/automobile`,
+        InsertVisitor: `${API}/visitor`,
+        InsertPackage: `${API}/package`,
+        GetEvents: `${API}/events/list`,
+    }
 }
