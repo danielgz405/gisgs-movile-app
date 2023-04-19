@@ -1,4 +1,4 @@
-const API = 'http://172.30.56.183:5050';
+const API = 'https://gisgs.azurewebsites.net';
 
 
 export const endPoints = {
