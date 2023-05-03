@@ -127,7 +127,7 @@ export default function Visitor ({ auth }) {
                 <TouchableOpacity
                     style={style.checkboxContainer}
                     onPress={() => {                        
-                            setChecked('into'); 
+                            setChecked('out'); 
                             setData({...data, into: false });
                         }}
                 >
@@ -138,7 +138,7 @@ export default function Visitor ({ auth }) {
                         color={themes.colors.primary}
                         status={ checked === 'out' ? 'checked' : 'unchecked' }
                         onPress={() => {                        
-                            setChecked('into'); 
+                            setChecked('out'); 
                             setData({...data, into: false });
                         }}
                     />

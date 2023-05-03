@@ -117,7 +117,7 @@ export default function Automobile({ auth }) {
                 <TouchableOpacity
                     style={style.checkboxContainer}
                     onPress={() => {                        
-                            setChecked('into'); 
+                            setChecked('out'); 
                             setData({...data, into: false });
                         }}
                 >
@@ -128,7 +128,7 @@ export default function Automobile({ auth }) {
                         color={themes.colors.primary}
                         status={ checked === 'out' ? 'checked' : 'unchecked' }
                         onPress={() => {                        
-                            setChecked('into'); 
+                            setChecked('out'); 
                             setData({...data, into: false });
                         }}
                     />

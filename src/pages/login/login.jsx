@@ -46,8 +46,12 @@ export default function Login({auth, setAuth}) {
                 Alert.alert('Ha ocurrido un error', `Verifique su conexion a internet`, [
                     {text: 'OK', onPress: () => console.log('OK Pressed')},
                 ]);
-            }else {
-                Alert.alert('Ha ocurrido un error', `${error}`, [
+            }else if (error.response && error.response.status === 401) {
+                Alert.alert('Ha ocurrido un error', `Correo o contraseña incorrectos`, [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                ]);
+            } else {
+                Alert.alert('Ha ocurrido un error', `Comunuquese con su programador para mas informacion`, [
                     {text: 'OK', onPress: () => console.log('OK Pressed')},
                 ]);
             }
